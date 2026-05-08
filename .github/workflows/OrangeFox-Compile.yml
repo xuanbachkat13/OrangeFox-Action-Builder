@@ -91,17 +91,18 @@ jobs:
     - name: Building OrangeFox
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
-        set +e
         source build/envsetup.sh
+        
+        # Thiết lập các thông số ép Android 13 và 64-bit
         export ALLOW_MISSING_DEPENDENCIES=true
-        set -e
-        lunch twrp_${{ inputs.DEVICE_NAME }}-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
-        source build/envsetup.sh
         export PLATFORM_VERSION=13
         export PLATFORM_SECURITY_PATCH=2099-12-31
-        export ALLOW_MISSING_DEPENDENCIES=true
-        lunch twrp_cannong-eng
-        mka recoveryimage -j$(nproc --all)
+        export TARGET_SUPPORTS_64_BIT_APPS=true
+        
+        # Thực hiện dọn dẹp và bắt đầu build
+        lunch twrp_${{ inputs.DEVICE_NAME }}-eng
+        make clean
+        mka adbd ${{ inputs.BUILD_TARGET }}image -j$(nproc --all)
 
     - name: Set Release Properties
       run: |
